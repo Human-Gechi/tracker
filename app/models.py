@@ -13,6 +13,7 @@ class User(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password_hashed: Mapped[str] = mapped_column(String, nullable=False)
+    is_active: Mapped[Boolean] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc)
     )
