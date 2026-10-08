@@ -8,3 +8,5 @@ python-jose[cryptography]
 python-multipart
 pytest
 httpx
+passlib
+pyjwt[crypto]

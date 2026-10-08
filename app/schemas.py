@@ -1,5 +1,5 @@
 import datetime as dt
-
+from typing import Optional
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
@@ -35,6 +35,12 @@ class UserRead(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class TokenData(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, from_attributes=True)
+
+    email: Optional[str] = None
 
 
 class HabitBase(BaseModel):
