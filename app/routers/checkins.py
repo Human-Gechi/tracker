@@ -120,7 +120,9 @@ def get_habits_today(
     db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
     habits = (
-        db.query(Habit).filter(Habit.user_id == user.id, Habit.is_archived.is_(False)).all()
+        db.query(Habit)
+        .filter(Habit.user_id == user.id, Habit.is_archived.is_(False))
+        .all()
     )
     today = date.today()
     items: list[TodayItem] = []
