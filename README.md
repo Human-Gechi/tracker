@@ -1,6 +1,6 @@
 # Trackr
 
-Trackr is a minimalist, distraction-free habit tracking application and streak engine. Built with FastAPI and modern Vanilla JavaScript, it offers daily ritual check-ins, streak calculations, completion analytics, and a responsive web interface with dark and light themes.
+Trackr is an application for helping track habits and users check off habits and can keep streaks for tasks that get checked off
 
 > #### *Note the Frontend was coded by Gemini. I am not much of a frontend developer.*
 
@@ -28,11 +28,6 @@ Trackr is a minimalist, distraction-free habit tracking application and streak e
 - **Validation & Settings**: [Pydantic v2](https://docs.pydantic.dev/) and [pydantic-settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
 - **Security & Tokens**: [python-jose](https://github.com/mpdavis/python-jose), [passlib](https://passlib.readthedocs.io/), and [argon2-cffi](https://argon2-cffi.readthedocs.io/)
 
-### Frontend
-- **Markup & Layout**: Semantic HTML5
-- **Styling**: Vanilla CSS3 design system with custom CSS variables, responsive grid and flexbox layouts, and theme switching
-- **Logic**: Vanilla JavaScript (ES6+) with native `fetch` API and client-side state handling
-- **Typography**: Google Fonts (Plus Jakarta Sans and JetBrains Mono)
 
 ### Tooling
 - **Linter & Formatter**: [Ruff](https://astral.sh/ruff)
