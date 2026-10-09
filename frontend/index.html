@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trackr — Daily Rituals & Streaks</title>
+  <meta name="description" content="A calm, distraction-free habit tracker inspired by Streaks and Everyday. Zero clutter, pure momentum.">
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('trackr_theme');
+        if (!theme) {
+          theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app" class="app-layout">
+
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand" id="brand-logo-btn" style="cursor: pointer;">
+          <div class="brand-dot"></div>
+          <div>
+            <span class="brand-title">Trackr</span>
+            <span class="brand-sub">Ritual</span>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs" id="main-nav">
+          <button class="nav-tab active" data-tab="landing" id="tab-btn-landing">
+            <span>Home</span>
+          </button>
+          <button class="nav-tab hidden auth-only" data-tab="today" id="tab-btn-today">
+            <span>Today</span>
+            <span class="badge" id="today-count-badge">0</span>
+          </button>
+          <button class="nav-tab hidden auth-only" data-tab="habits" id="tab-btn-habits">
+            <span>Habits</span>
+          </button>
+          <button class="nav-tab hidden auth-only" data-tab="analytics" id="tab-btn-analytics">
+            <span>Stats</span>
+          </button>
+        </nav>
+
+        <!-- User Controls & Theme Toggle -->
+        <div class="user-controls">
+          <button class="theme-toggle-btn" id="theme-toggle-btn" type="button" title="Toggle Light / Dark mode" aria-label="Toggle theme">
+            <!-- Sun icon for switching to light mode -->
+            <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <!-- Moon icon for switching to dark mode -->
+            <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+
+          <div id="auth-logged-in" class="user-profile hidden">
+            <span class="user-tag" id="user-display-email">user@domain.com</span>
+            <button class="btn btn-ghost btn-sm" id="btn-logout" title="Sign out">Logout</button>
+          </div>
+          <div id="auth-logged-out" class="auth-buttons">
+            <button class="btn btn-ghost btn-sm" id="btn-open-login">Sign In</button>
+            <button class="btn btn-primary btn-sm" id="btn-open-signup">Create Account</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="container">
+
+        <!-- VIEW 0: HOME / LANDING (BEFORE SIGN IN) -->
+        <section id="view-landing" class="view-panel">
+          <div class="landing-hero">
+            <span class="landing-pill">The Science of Consistency</span>
+            <h1 class="landing-title">Build rituals that stick.<br>Track momentum that lasts.</h1>
+            <p class="landing-desc">
+              A calm, distraction-free daily habit and streak tracker. Zero clutter, zero noise. Designed to eliminate friction and help you show up every single day.
+            </p>
+            <div class="landing-cta-group">
+              <button class="btn btn-primary" onclick="openAuthModal('signup')">Start Tracking Free</button>
+              <button class="btn btn-secondary" onclick="openAuthModal('login')">Sign In</button>
+            </div>
+          </div>
+
+          <!-- Interactive Live Demo Sandbox with Auto-check Animation -->
+          <div class="landing-demo-box" id="landing-demo-box">
+            <div class="demo-box-header">
+              <div>
+                <span class="demo-box-badge">Live Interactive Preview</span>
+                <h3 style="font-size: 16px; font-weight: 700; margin-top: 4px;">Experience Single-Tap Rituals</h3>
+              </div>
+              <div class="demo-status-pill">
+                <span class="demo-status-dot"></span>
+                <span id="demo-status-label">Auto-completing rituals...</span>
+              </div>
+            </div>
+            
+            <div class="habits-list" id="landing-demo-habits">
+              <div class="habit-row" id="demo-habit-1" onclick="toggleDemoHabit(1)">
+                <div class="habit-row-left">
+                  <button class="check-trigger" type="button" aria-label="Toggle Morning Movement">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </button>
+                  <div class="habit-details">
+                    <span class="habit-name">Morning 20m Movement</span>
+                    <span class="habit-desc">Wake up, stretch, and brisk jog</span>
+                  </div>
+                </div>
+                <div class="habit-row-right">
+                  <span class="streak-counter" id="demo-streak-1">⚡ 12 days</span>
+                </div>
+              </div>
+
+              <div class="habit-row" id="demo-habit-2" onclick="toggleDemoHabit(2)">
+                <div class="habit-row-left">
+                  <button class="check-trigger" type="button" aria-label="Toggle Read 20 Pages">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </button>
+                  <div class="habit-details">
+                    <span class="habit-name">Read 20 Pages</span>
+                    <span class="habit-desc">Books before screen time</span>
+                  </div>
+                </div>
+                <div class="habit-row-right">
+                  <span class="streak-counter" id="demo-streak-2">⚡ 7 days</span>
+                </div>
+              </div>
+
+              <div class="habit-row" id="demo-habit-3" onclick="toggleDemoHabit(3)">
+                <div class="habit-row-left">
+                  <button class="check-trigger" type="button" aria-label="Toggle Hydrate">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </button>
+                  <div class="habit-details">
+                    <span class="habit-name">Hydrate (2.5L Water)</span>
+                    <span class="habit-desc">Stay energized throughout the afternoon</span>
+                  </div>
+                </div>
+                <div class="habit-row-right">
+                  <span class="streak-counter" id="demo-streak-3">⚡ 4 days</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="demo-box-footer">
+              <span class="demo-tip">💡 Tap any ritual to try, or watch momentum build in real-time</span>
+              <button class="demo-playpause-btn" id="demo-playpause-btn" type="button" title="Pause or resume auto-play">
+                <span id="demo-playpause-icon">⏸</span> <span id="demo-playpause-text">Pause</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3 Pillars Grid -->
+          <div class="landing-pillars">
+            <div class="pillar-card">
+              <div class="pillar-num">01 / SPEED</div>
+              <h3 class="pillar-heading">Frictionless 1-Tap Checkins</h3>
+              <p class="pillar-text">Update your entire daily routine in under 10 seconds. Designed so logging never becomes a chore in itself.</p>
+            </div>
+            <div class="pillar-card">
+              <div class="pillar-num">02 / MOMENTUM</div>
+              <h3 class="pillar-heading">Intelligent Streaks</h3>
+              <p class="pillar-text">Tracks active streaks, longest historical chains, and consistency rates without punishing timezone changes.</p>
+            </div>
+            <div class="pillar-card">
+              <div class="pillar-num">03 / FOCUS</div>
+              <h3 class="pillar-heading">Clean, Calm Interface</h3>
+              <p class="pillar-text">Solid matte colors with zero distracting gradients, zero notifications spam, and zero social algorithms.</p>
+            </div>
+          </div>
+
+          <footer class="landing-footer">
+            <p>Trackr &bull; Built for daily momentum & consistency.</p>
+          </footer>
+        </section>
+
+        <!-- VIEW 1: TODAY'S CHECKLIST -->
+        <section id="view-today" class="view-panel active">
+          <div class="hero-block">
+            <div class="hero-top-row">
+              <div>
+                <span class="date-pill" id="current-date-display">Today</span>
+                <h1 class="page-title">Today's Focus</h1>
+                <p class="page-subtitle">Complete your rituals. Build consistency one day at a time.</p>
+              </div>
+              <button class="btn btn-primary" id="btn-quick-new-habit">
+                + New Habit
+              </button>
+            </div>
+
+            <!-- Daily Progress Strip -->
+            <div class="progress-strip-card">
+              <div class="progress-strip-meta">
+                <span class="progress-strip-label">Daily Completion</span>
+                <span class="progress-strip-stat">
+                  <span id="progress-ratio">0 / 0 Completed</span>
+                  <span class="progress-strip-pct" id="progress-percent-text">0%</span>
+                </span>
+              </div>
+              <div class="progress-strip-track">
+                <div class="progress-strip-fill" id="progress-bar-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Habit Checklist List with Quick Filter & Compact Grid Toggle -->
+          <div class="section-block">
+            <div class="today-controls-strip">
+              <div class="today-filter-group">
+                <button class="today-filter-btn active" data-filter="all" id="filter-today-all">All (<span id="count-today-all">0</span>)</button>
+                <button class="today-filter-btn" data-filter="todo" id="filter-today-todo">To Do (<span id="count-today-todo">0</span>)</button>
+                <button class="today-filter-btn" data-filter="done" id="filter-today-done">Completed (<span id="count-today-done">0</span>)</button>
+              </div>
+
+              <div class="today-search-field">
+                <svg class="today-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" id="today-search-input" class="today-search-input" placeholder="Quick filter habits...">
+              </div>
+
+              <div class="view-mode-toggle">
+                <button class="view-mode-btn active" data-mode="list" id="btn-mode-list" title="Standard Rows">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"/>
+                    <line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                  </svg>
+                  <span>Rows</span>
+                </button>
+                <button class="view-mode-btn" data-mode="grid" id="btn-mode-grid" title="Compact Grid (fit all habits without scrolling)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                  </svg>
+                  <span>Compact</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="habits-scroll-wrap">
+              <div id="today-habits-list" class="habits-list">
+                <div class="loading-state">
+                  <div class="spinner"></div>
+                  <p>Loading habits...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 2: MANAGE ALL HABITS -->
+        <section id="view-habits" class="view-panel">
+          <div class="hero-block">
+            <div class="hero-top-row">
+              <div>
+                <h1 class="page-title">Habit Library</h1>
+                <p class="page-subtitle">Review, edit, and organize all habits in your tracker.</p>
+              </div>
+              <button class="btn btn-primary" id="btn-new-habit-manage">
+                + Add Habit
+              </button>
+            </div>
+
+            <!-- Search & Filter Strip -->
+            <div class="toolbar-strip">
+              <div class="search-field-wrap">
+                <svg class="search-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" id="habit-search-input" class="search-input" placeholder="Search habits by name...">
+              </div>
+
+              <div class="filter-group">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="active">Active</button>
+                <button class="filter-btn" data-filter="archived">Archived</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid of Habits -->
+          <div id="all-habits-grid" class="manage-grid">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- VIEW 3: STATS & STREAKS -->
+        <section id="view-analytics" class="view-panel">
+          <div class="hero-block">
+            <div class="hero-top-row">
+              <div>
+                <h1 class="page-title">Momentum & Streaks</h1>
+                <p class="page-subtitle">Track consecutive days, consistency metrics, and records.</p>
+              </div>
+              <div style="min-width: 220px;">
+                <select id="stats-habit-select" class="form-select">
+                  <option value="">Select a habit...</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- KPI Metric Boxes -->
+            <div class="stats-kpi-grid">
+              <div class="kpi-box kpi-current">
+                <div class="kpi-title">Current Streak</div>
+                <div class="kpi-num" id="kpi-current-streak">0</div>
+                <div class="kpi-footer-text">Consecutive active days</div>
+              </div>
+
+              <div class="kpi-box kpi-record">
+                <div class="kpi-title">Longest Streak</div>
+                <div class="kpi-num" id="kpi-longest-streak">0</div>
+                <div class="kpi-footer-text">Personal all-time record</div>
+              </div>
+
+              <div class="kpi-box kpi-rate">
+                <div class="kpi-title">Completion Rate</div>
+                <div class="kpi-num" id="kpi-completion-rate">0%</div>
+                <div class="kpi-footer-text">Historical adherence</div>
+              </div>
+            </div>
+
+            <!-- Detail Box -->
+            <div class="stats-detail-card" id="analytics-detail-panel">
+              <div class="detail-head">
+                <div>
+                  <h3 class="detail-heading" id="stats-habit-title">Select a Habit Above</h3>
+                  <p class="detail-paragraph" id="stats-habit-desc">Choose a habit to view its streak consistency.</p>
+                </div>
+                <div id="stats-action-buttons"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- Modal: Create / Edit Habit -->
+    <div class="modal-overlay hidden" id="habit-modal">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-habit-heading">Create New Habit</h3>
+          <button class="modal-close-btn" id="btn-close-habit-modal">&times;</button>
+        </div>
+        <form id="form-habit" class="modal-body">
+          <input type="hidden" id="modal-habit-id" value="">
+          
+          <div class="form-group">
+            <label for="habit-input-name" class="form-label">Habit Name *</label>
+            <input type="text" id="habit-input-name" class="form-input" placeholder="e.g. Read 20 pages" required maxlength="50">
+            <span class="form-hint">Max 50 characters</span>
+          </div>
+
+          <div class="form-group">
+            <label for="habit-input-desc" class="form-label">Description (Optional)</label>
+            <textarea id="habit-input-desc" class="form-textarea" placeholder="Why are you building this habit?" rows="3" maxlength="200"></textarea>
+            <span class="form-hint">Max 200 characters</span>
+          </div>
+
+          <div class="form-group checkbox-group hidden" id="modal-archive-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="habit-input-archived" class="form-checkbox">
+              <span>Archive habit (hide from daily checklist)</span>
+            </label>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-habit-modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btn-save-habit">Save Habit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Authentication -->
+    <div class="modal-overlay hidden" id="auth-modal">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title" id="auth-modal-title">Sign In</h3>
+          <button class="modal-close-btn" id="btn-close-auth-modal">&times;</button>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="auth-tab-login">Sign In</button>
+          <button class="auth-tab" id="auth-tab-signup">Create Account</button>
+        </div>
+
+        <form id="form-auth" class="modal-body">
+          <div class="form-group">
+            <label for="auth-input-email" class="form-label">Email</label>
+            <input type="email" id="auth-input-email" class="form-input" placeholder="name@domain.com" required autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label for="auth-input-password" class="form-label">Password</label>
+            <input type="password" id="auth-input-password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+            <span class="form-hint" id="password-requirement-hint" style="display:none;">
+              Must be 8+ characters with uppercase, lowercase, digit, & special character.
+            </span>
+          </div>
+
+          <div class="auth-error-banner hidden" id="auth-error-banner"></div>
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary btn-block" id="btn-auth-submit">
+              Sign In
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
