@@ -11,7 +11,7 @@ TOKEN = settings.access_token_expire_minutes
 ALGORITHM = settings.algorithm
 SECRET_KEY = settings.secret_key
 
-password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+password_context = CryptContext(schemes=["argon2"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 

@@ -1,6 +1,8 @@
+from sqlalchemy import Integer
 from datetime import date, datetime, timezone
 from sqlalchemy import String, Date, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+import secrets
 
 
 class Base(DeclarativeBase):
@@ -10,10 +12,11 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+    id: Mapped[str] = mapped_column(
+        String, primary_key=True, default=lambda: f"usr_{secrets.token_urlsafe(8)}"
+    )
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password_hashed: Mapped[str] = mapped_column(String, nullable=False)
-    is_active: Mapped[Boolean] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc)
     )
@@ -22,7 +25,7 @@ class User(Base):
 class Habit(Base):
     __tablename__ = "habits"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
@@ -35,6 +38,6 @@ class Habit(Base):
 class Checkin(Base):
     __tablename__ = "checkins"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    habit_id: Mapped[str] = mapped_column(ForeignKey("habits.id"), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    habit_id: Mapped[int] = mapped_column(ForeignKey("habits.id"), nullable=False)
     date: Mapped[date] = mapped_column(Date, nullable=False)

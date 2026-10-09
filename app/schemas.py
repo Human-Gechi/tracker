@@ -1,11 +1,32 @@
 import datetime as dt
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+import re
 
 
 class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=72)
+
+    @field_validator("password")
+    @classmethod
+    def valid_password(cls, v: str):
+        if len(v.encode("utf-8")) > 72:
+            raise ValueError("Password cannot excced 72 bytes")
+
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain atleast one lowercase letter")
+
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain atleast one uppercase letter")
+
+        if not re.search(r"[0-9]", v):
+            raise ValueError("Password must contain atleast one digit")
+
+        if not re.search(r"[\W_]", v):
+            raise ValueError("Password must contain atleast one special character")
+
+        return v
 
     @field_validator("email")
     @classmethod
@@ -27,7 +48,7 @@ class UserLogin(BaseModel):
 class UserRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: str
     email: EmailStr
     created_at: dt.datetime
 
