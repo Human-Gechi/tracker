@@ -3,7 +3,7 @@ from app.dependencies import get_current_user
 from app.database import get_db
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, status, HTTPException
-from app.schemas import HabitCreate, HabitRead
+from app.schemas import HabitCreate, HabitRead, HabitUpdate
 
 habit_router = APIRouter(tags=["Habit"], prefix="/habits")
 
@@ -19,7 +19,6 @@ def create_habit(
     db.add(new_habit)
     db.commit()
     db.refresh(new_habit)
-    db.close()
 
     return new_habit
 
@@ -49,19 +48,23 @@ def get_habit(
 
 @habit_router.put("/{id}", response_model=HabitRead, status_code=status.HTTP_200_OK)
 def update_habit(
-    id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+    id: int,
+    habit_data: HabitUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
     habit = db.query(Habit).filter(Habit.user_id == user.id, Habit.id == id).first()
     if not habit:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Habit could not be updated"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Habit not found"
         )
-    habit.name = habit.name
-    habit.description = habit.description
-    habit.is_archived = habit.is_archived
+
+    update_dict = habit_data.model_dump(exclude_unset=True)
+    for field, value in update_dict.items():
+        setattr(habit, field, value)
+
     db.commit()
     db.refresh(habit)
-    db.close()
     return habit
 
 
@@ -77,6 +80,5 @@ def delete_habit(
 
     db.delete(habit)
     db.commit()
-    db.close()
 
     return None

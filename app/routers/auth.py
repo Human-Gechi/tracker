@@ -37,14 +37,21 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
-    user_query = db.query(User).filter(User.email == form_data.username).first()
+    email = form_data.username.lower().strip()
+    user_query = db.query(User).filter(User.email == email).first()
 
-    if not user_query or not verify_password(
-        form_data.password, user_query.password_hashed
-    ):
+    if not user_query:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Wrong Info",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not verify_password(form_data.password, user_query.password_hashed):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)

@@ -12,7 +12,7 @@ ALGORITHM = settings.algorithm
 SECRET_KEY = settings.secret_key
 
 password_context = CryptContext(schemes=["argon2"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> None:
