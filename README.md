@@ -1,8 +1,11 @@
 # Trackr
 
-Trackr is an application for helping track habits and users check off habits and can keep streaks for tasks that get checked off
+Trackr is an application for helping track habits and users check off habits and can keep streaks for tasks that get checked off.
 
-> #### *Note the Frontend was coded by Gemini. I am not much of a frontend developer.*
+<img width="1919" height="709" alt="image" src="https://github.com/user-attachments/assets/ff2246ca-df62-45b4-b144-4843f1d063ec" />
+
+
+> ### Note the Frontend was coded by Gemini. I am not much of a frontend developer.
 
 ---
 
